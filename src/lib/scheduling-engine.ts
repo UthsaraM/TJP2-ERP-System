@@ -28,42 +28,58 @@ export interface ScheduleBlock {
   batchGroup?: string;
 }
 
-// 1. ROUTE_STEPS (Step sequences for each route)
-export const ROUTE_STEPS: Record<RouteType, string[]> = {
-  Reactive: ["Preparation", "Printing", "Steaming", "Washing", "Stentering", "Inspection"],
-  Disperse: ["Preparation", "Printing", "Drying", "HeatSetting", "Washing", "Stentering", "Inspection"],
-  PSS: ["Preparation", "Printing", "Steaming", "Washing", "Finishing", "Inspection"],
-  PD: ["Preparation", "Printing", "Curing", "Inspection"],
-  Acid: ["Preparation", "Printing", "Steaming", "AcidWashing", "Stentering", "Inspection"],
+// 1. ROUTE_STEPS (New step sequences matching TexPrint plant processes)
+export const ROUTE_STEPS: Record<RouteType, Array<{ stepName: string; machineGroup: string }>> = {
+  PSS: [
+    { stepName: "Printing", machineGroup: "print" },
+    { stepName: "Baking", machineGroup: "cure" },
+    { stepName: "Finishing", machineGroup: "dry" },
+  ],
+  PD: [
+    { stepName: "Printing", machineGroup: "print" },
+    { stepName: "Steaming", machineGroup: "steam" },
+    { stepName: "Baking", machineGroup: "cure" },
+    { stepName: "Washing", machineGroup: "wash" },
+    { stepName: "Finishing", machineGroup: "dry" },
+  ],
+  Reactive: [
+    { stepName: "Printing", machineGroup: "print" },
+    { stepName: "Steaming", machineGroup: "steam" },
+    { stepName: "Washing", machineGroup: "wash" },
+    { stepName: "Finishing", machineGroup: "dry" },
+  ],
+  Acid: [
+    { stepName: "Printing", machineGroup: "print" },
+    { stepName: "Steaming", machineGroup: "steam" },
+    { stepName: "Washing", machineGroup: "wash" },
+    { stepName: "Finishing", machineGroup: "dry" },
+  ],
+  Disperse: [
+    { stepName: "Printing", machineGroup: "print" },
+    { stepName: "Curing", machineGroup: "cure" },
+    { stepName: "Washing", machineGroup: "wash" },
+    { stepName: "Finishing", machineGroup: "dry" },
+  ],
 };
 
-// 2. MACHINE_GROUPS (Machines capable of specific steps)
+// 2. MACHINE_GROUPS (Updated to match your real machines)
 export const MACHINE_GROUPS: Record<string, string[]> = {
-  "Preparation": ["Prep-01", "Prep-02"],
-  "Printing": ["Print-Alpha", "Print-Beta", "Print-Gamma"],
-  "Steaming": ["Steam-01", "Steam-02"],
-  "Washing": ["Wash-A", "Wash-B"],
-  "AcidWashing": ["Wash-Acid-01"],
-  "Stentering": ["Stenter-1", "Stenter-2", "Stenter-3"],
-  "Drying": ["Dryer-1"],
-  "HeatSetting": ["Stenter-1", "Stenter-2"], // Stenters can do heat setting
-  "Curing": ["Baker-01"],
-  "Finishing": ["Finish-01", "Finish-02"],
-  "Inspection": ["Inspect-01", "Inspect-02", "Inspect-03"],
+  "print": ["Print-01", "Print-02", "Print-03"],
+  "steam": ["Steam-01"],
+  "wash": ["Wash-01"],
+  "dry": ["Dryer-01"],
+  "cure": ["Baker-01"],
 };
 
 // 3. MACHINE_SPEEDS (m/min)
 export const MACHINE_SPEEDS: Record<string, number> = {
-  "Prep-01": 50, "Prep-02": 50,
-  "Print-Alpha": 30, "Print-Beta": 35, "Print-Gamma": 25,
-  "Steam-01": 20, "Steam-02": 25,
-  "Wash-A": 40, "Wash-B": 45,
-  "Wash-Acid-01": 30,
-  "Stenter-1": 40, "Stenter-2": 40, "Stenter-3": 50,
-  "Dryer-1": 60,
+  "Print-01": 30,
+  "Print-02": 30,
+  "Print-03": 30,
+  "Steam-01": 20,
+  "Wash-01": 40,
+  "Dryer-01": 60,
   "Baker-01": 20,
-  "Finish-01": 50, "Finish-02": 50,
-  "Inspect-01": 60, "Inspect-02": 60, "Inspect-03": 60,
 };
 
 // 4. ROUTE_WEIGHT (Efficiency factors for urgency)
@@ -143,14 +159,15 @@ export function scheduleOrders(orders: Order[], currentSchedules: ScheduleBlock[
         new Date(a.endTime).getTime() - new Date(b.endTime).getTime()
       );
       const lastBlock = sortedBlocks[sortedBlocks.length - 1];
-      lastScheduledStepIdx = steps.indexOf(lastBlock.stepName);
+      lastScheduledStepIdx = steps.findIndex(s => s.stepName === lastBlock.stepName);
       orderAvailableAt = new Date(lastBlock.endTime);
     }
 
     // Schedule remaining steps
     for (let i = lastScheduledStepIdx + 1; i < steps.length; i++) {
         const step = steps[i];
-        const possibleMachines = MACHINE_GROUPS[step];
+        const machineGroupName = step.machineGroup;
+        const possibleMachines = MACHINE_GROUPS[machineGroupName];
         if (!possibleMachines || possibleMachines.length === 0) continue;
 
         // Find the earliest available machine for this step
@@ -181,7 +198,7 @@ export function scheduleOrders(orders: Order[], currentSchedules: ScheduleBlock[
         // Create the block
         newSchedules.push({
             orderId: order.orderId,
-            stepName: step,
+            stepName: step.stepName,
             machine: selectedMachine,
             startTime: startTime.toISOString(),
             endTime: endTime.toISOString(),
