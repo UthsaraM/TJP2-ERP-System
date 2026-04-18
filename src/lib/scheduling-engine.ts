@@ -33,32 +33,32 @@ export const ROUTE_STEPS: Record<RouteType, Array<{ stepName: string; machineGro
   PSS: [
     { stepName: "Printing", machineGroup: "print" },
     { stepName: "Baking", machineGroup: "cure" },
-    { stepName: "Finishing", machineGroup: "dry" },
+    { stepName: "Finishing", machineGroup: "finish" },
   ],
   PD: [
     { stepName: "Printing", machineGroup: "print" },
     { stepName: "Steaming", machineGroup: "steam" },
     { stepName: "Baking", machineGroup: "cure" },
     { stepName: "Washing", machineGroup: "wash" },
-    { stepName: "Finishing", machineGroup: "dry" },
+    { stepName: "Finishing", machineGroup: "finish" },
   ],
   Reactive: [
     { stepName: "Printing", machineGroup: "print" },
     { stepName: "Steaming", machineGroup: "steam" },
     { stepName: "Washing", machineGroup: "wash" },
-    { stepName: "Finishing", machineGroup: "dry" },
+    { stepName: "Finishing", machineGroup: "finish" },
   ],
   Acid: [
     { stepName: "Printing", machineGroup: "print" },
     { stepName: "Steaming", machineGroup: "steam" },
     { stepName: "Washing", machineGroup: "wash" },
-    { stepName: "Finishing", machineGroup: "dry" },
+    { stepName: "Finishing", machineGroup: "finish" },
   ],
   Disperse: [
     { stepName: "Printing", machineGroup: "print" },
     { stepName: "Curing", machineGroup: "cure" },
     { stepName: "Washing", machineGroup: "wash" },
-    { stepName: "Finishing", machineGroup: "dry" },
+    { stepName: "Finishing", machineGroup: "finish" },
   ],
 };
 
@@ -67,7 +67,7 @@ export const MACHINE_GROUPS: Record<string, string[]> = {
   "print": ["Print-01", "Print-02", "Print-03"],
   "steam": ["Steam-01"],
   "wash": ["Wash-01"],
-  "dry": ["Dryer-01"],
+  "finish": ["Stenter-01"],
   "cure": ["Baker-01"],
 };
 
@@ -78,7 +78,7 @@ export const MACHINE_SPEEDS: Record<string, number> = {
   "Print-03": 30,
   "Steam-01": 20,
   "Wash-01": 40,
-  "Dryer-01": 60,
+  "Stenter-01": 60,
   "Baker-01": 20,
 };
 
